@@ -1,44 +1,43 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware pour parser le JSON
 app.use(express.json());
 
 // Connexion à MongoDB
-mongoose.connect('mongodb://localhost:27017/monprojet', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(err => console.log('Erreur de connexion à MongoDB :', err));
 
-// Définir un modèle Mongoose (exemple : utilisateur)
-const User = mongoose.model('User', new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  age: { type: Number }
+// Définir un modèle Mongoose pour les items
+const Item = mongoose.model('Item', new mongoose.Schema({
+  name: { type: String, required: true }
 }));
 
-// Route pour créer un utilisateur
-app.post('/users', async (req, res) => {
+// Route pour créer un item
+app.post('/items', async (req, res) => {
   try {
-    const { name, email, age } = req.body;
-    const user = new User({ name, email, age });
-    await user.save();
-    res.status(201).json(user);
+    const { name } = req.body;
+    const item = new Item({ name });
+    await item.save();
+    res.status(201).json(item);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// Route pour récupérer tous les utilisateurs
-app.get('/users', async (req, res) => {
+// Route pour récupérer tous les items
+app.get('/items', async (req, res) => {
   try {
-    const users = await User.find();
-    res.status(200).json(users);
+    const items = await Item.find();
+    res.status(200).json(items);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
